@@ -10,21 +10,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import com.locadorafilmes.locadora.model.Usuario;
 import com.locadorafilmes.locadora.repository.UsuarioRepository;
 
-import com.locadorafilmes.locadora.service.ClienteService;
-import com.locadorafilmes.locadora.service.FilmeService;
-import com.locadorafilmes.locadora.service.LocacaoService;
-import com.locadorafilmes.locadora.service.PagamentoService;
-
 @Controller
 public class HomeController {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
-
-    @Autowired private LocacaoService locacaoService;
-    @Autowired private FilmeService filmeService;
-    @Autowired private ClienteService clienteService;
-    @Autowired private PagamentoService pagamentoService;
 
     @GetMapping("/home")
     public String home(Model model, Authentication authentication) {
@@ -61,14 +51,7 @@ public class HomeController {
     }
     
     @GetMapping("/dashboard")
-    public String dashboard(Model model) {
-        model.addAttribute("totalLocacoes", locacaoService.listarTodos().size());
-        model.addAttribute("filmesDisponiveis", filmeService.listarTodos().size());
-        model.addAttribute("totalPagamentos", pagamentoService.listarTodos().size());
-        model.addAttribute("totalClientes", clienteService.listarTodos().size());
-
-        model.addAttribute("ultimasLocacoes", locacaoService.buscarUltimasLocacoes());
-
+    public String dashboard() {
     	return "dashboard";
     }
 }
