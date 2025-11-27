@@ -1,5 +1,9 @@
 package com.locadorafilmes.locadora.controller;
 
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -7,9 +11,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import com.locadorafilmes.locadora.model.Locacao;
 import com.locadorafilmes.locadora.model.Usuario;
 import com.locadorafilmes.locadora.repository.UsuarioRepository;
-
 import com.locadorafilmes.locadora.service.ClienteService;
 import com.locadorafilmes.locadora.service.FilmeService;
 import com.locadorafilmes.locadora.service.LocacaoService;
@@ -20,7 +24,7 @@ public class HomeController {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
-
+    
     @Autowired private LocacaoService locacaoService;
     @Autowired private FilmeService filmeService;
     @Autowired private ClienteService clienteService;
@@ -29,7 +33,6 @@ public class HomeController {
     @GetMapping("/home")
     public String home(Model model, Authentication authentication) {
         String login = authentication.getName(); 
-
         Usuario usuario = usuarioRepository.findByUsername(login).orElse(null); 
         String nome = usuario != null ? usuario.getNome() : login; 
         
@@ -46,6 +49,8 @@ public class HomeController {
 
         model.addAttribute("userName", nome);
         model.addAttribute("userRole", funcao);
+        
+        carregarDadosDashboard(model);
 
         return "home";
     }
@@ -62,13 +67,23 @@ public class HomeController {
     
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
-        model.addAttribute("totalLocacoes", locacaoService.listarTodos().size());
-        model.addAttribute("filmesDisponiveis", filmeService.listarTodos().size());
-        model.addAttribute("totalPagamentos", pagamentoService.listarTodos().size());
-        model.addAttribute("totalClientes", clienteService.listarTodos().size());
-
-        model.addAttribute("ultimasLocacoes", locacaoService.buscarUltimasLocacoes());
-
+        carregarDadosDashboard(model);
     	return "dashboard";
+    }
+    
+    private void carregarDadosDashboard(Model model) {
+        List<Locacao> todasLocacoes = locacaoService.listarTodos();
+        
+        model.addAttribute("totalLocacoes", todasLocacoes.size());
+        model.addAttribute("filmesDisponiveis", filmeService.listarTodos().size());
+        model.addAttribute("clientesAtivos", clienteService.listarTodos().size());
+        model.addAttribute("totalPagamentos", pagamentoService.listarTodos().size());
+        
+        List<Locacao> ultimas = todasLocacoes.stream()
+            .sorted(Comparator.comparing(Locacao::getId).reversed())
+            .limit(5)
+            .collect(Collectors.toList());
+            
+        model.addAttribute("ultimasLocacoes", ultimas);
     }
 }

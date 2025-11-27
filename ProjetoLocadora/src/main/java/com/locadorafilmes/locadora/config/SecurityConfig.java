@@ -13,18 +13,15 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
-                // Permite acesso público às rotas principais, estáticos e de login/registro
                 .requestMatchers("/", "/index", "/locacoes/**", 
                                "/filmes/**", "/clientes/**",
                                "/pagamentos/**","/relatorios/**",
-                               "/dashboard","/login","/registrar" , "/css/**", "/js/**").permitAll()
-                // Qualquer outra requisição precisa de autenticação
+                               "/dashboard","/login","/registrar", 
+                               "/css/**", "/js/**", "/images/**").permitAll()
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
-                // Define a página de login customizada
                 .loginPage("/login")
-                // Redireciona para "/home" após o login bem-sucedido
                 .defaultSuccessUrl("/home",true)
                 .permitAll()
             )
